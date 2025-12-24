@@ -1,0 +1,43 @@
+{
+  "lastUpdate": "2025-12-24T15:22:38.819Z",
+  "releases": [
+    {
+      "platform": "iOS",
+      "version": "iOS & iPadOS 26.3 Beta",
+      "status": "Beta",
+      "date": "2025-12-24",
+      "link": "https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-26_3-release-notes"
+    },
+    {
+      "platform": "Chrome",
+      "channel": "Stable",
+      "version": "v143",
+      "status": "Stable",
+      "date": "2025-11-19",
+      "link": "https://chromestatus.com/roadmap"
+    },
+    {
+      "platform": "Chrome",
+      "channel": "Beta",
+      "version": "v144",
+      "status": "Beta",
+      "date": "2026-01-07",
+      "link": "https://chromestatus.com/roadmap"
+    },
+    {
+      "platform": "Chrome",
+      "channel": "Dev",
+      "version": "v145",
+      "status": "Dev",
+      "date": "2026-01-28",
+      "link": "https://chromestatus.com/roadmap"
+    },
+    {
+      "platform": "Whale",
+      "version": "v4.35.351.13",
+      "status": "Official",
+      "date": "2025-12-03",
+      "link": "https://notice.naver.com/notices/whalehomepage/28005"
+    }
+  ]
+}

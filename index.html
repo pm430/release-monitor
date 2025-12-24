@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Monitor | Senior Developer Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header>
+        <div class="container">
+            <h1>Release Monitor</h1>
+            <p class="subtitle">Stay updated with the latest client environment changes.</p>
+            <div id="last-update" class="last-update">Loading...</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="dashboard" class="dashboard">
+            <!-- Cards will be injected here -->
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Fetching latest data...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Senior Developer Release Monitor. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
