@@ -6,6 +6,7 @@
     --text-secondary: #a0a0a0;
     --accent-ios: #007aff;
     --accent-chrome: #4285f4;
+    --accent-edge: #0078d7;
     --accent-whale: #00c73c;
     --accent-beta: #ff9500;
 }
@@ -159,6 +160,10 @@ header h1 {
 
 .card.chrome::before {
     background: var(--accent-chrome);
+}
+
+.card.edge::before {
+    background: var(--accent-edge);
 }
 
 .card.whale::before {

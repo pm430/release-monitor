@@ -95,6 +95,40 @@ async function getWhaleRelease() {
     }
 }
 
+async function getEdgeRelease() {
+    try {
+        const url = 'https://edgeupdates.microsoft.com/api/products';
+        const { data } = await axios.get(url);
+
+        const channels = ['Stable', 'Beta', 'Dev'];
+        const results = [];
+
+        channels.forEach(channelName => {
+            const product = data.find(p => p.Product === channelName);
+            if (product && product.Releases.length > 0) {
+                // Releases are not guaranteed to be sorted, so sort by PublishedTime desc just in case
+                // or assume API returns sorted. Let's assume sorted or take the first.
+                // Actually, let's sort to be safe.
+                const releases = product.Releases.sort((a, b) => new Date(b.PublishedTime) - new Date(a.PublishedTime));
+                const latest = releases[0];
+
+                results.push({
+                    platform: 'Edge',
+                    version: `v${latest.ProductVersion}`,
+                    status: channelName,
+                    date: latest.PublishedTime.split('T')[0],
+                    link: `https://learn.microsoft.com/en-us/deployedge/microsoft-edge-relnote-${channelName.toLowerCase()}-channel`
+                });
+            }
+        });
+
+        return results;
+    } catch (error) {
+        console.error('Error fetching Edge release:', error.message);
+        return null;
+    }
+}
+
 async function main() {
     console.log('Starting release monitor scraping...');
 
@@ -109,6 +143,15 @@ async function main() {
             results.push(...chrome);
         } else {
             results.push(chrome);
+        }
+    }
+
+    const edge = await getEdgeRelease();
+    if (edge) {
+        if (Array.isArray(edge)) {
+            results.push(...edge);
+        } else {
+            results.push(edge);
         }
     }
 
