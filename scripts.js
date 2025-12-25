@@ -1,6 +1,70 @@
-document.addEventListener('DOMContentLoaded', () => {
-    fetchData();
+// DOM Elements
+const triggerBtn = document.getElementById('trigger-btn');
+const modal = document.getElementById('token-modal');
+const closeBtn = document.getElementById('close-modal-btn');
+const saveBtn = document.getElementById('save-token-btn');
+const tokenInput = document.getElementById('gh-token');
+
+// Event Listeners
+triggerBtn.addEventListener('click', () => {
+    const storedToken = localStorage.getItem('gh_token');
+    if (storedToken) {
+        triggerWorkflow(storedToken);
+    } else {
+        modal.classList.remove('hidden');
+    }
 });
+
+closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
+
+saveBtn.addEventListener('click', () => {
+    const token = tokenInput.value.trim();
+    if (token) {
+        localStorage.setItem('gh_token', token);
+        modal.classList.add('hidden');
+        triggerWorkflow(token);
+    }
+});
+
+async function triggerWorkflow(token) {
+    const REPO_OWNER = 'pm430';
+    const REPO_NAME = 'release-monitor';
+    const WORKFLOW_ID = 'monitor.yml';
+
+    triggerBtn.disabled = true;
+    triggerBtn.innerHTML = '<span class="icon spinner" style="width:1rem;height:1rem;border-width:2px;margin:0;"></span> Triggering...';
+
+    try {
+        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ref: 'main'
+            })
+        });
+
+        if (response.ok) {
+            alert('Update started! The dashboard will reflect changes in about 1-2 minutes.');
+        } else {
+            const err = await response.json();
+            console.error(err);
+            alert(`Failed to trigger update: ${response.status} ${response.statusText}\nCheck your token permissions (need repo/workflow scope).`);
+            localStorage.removeItem('gh_token'); // Clear invalid token
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Network error occurred.');
+    } finally {
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = '<span class="icon">↻</span> Trigger Update';
+    }
+}
 
 async function fetchData() {
     try {
@@ -78,3 +142,8 @@ function createCard(releases) {
 
     return card;
 }
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData();
+});

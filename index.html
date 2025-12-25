@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="background-blobs">
         <div class="blob blob-1"></div>
@@ -21,8 +23,26 @@
             <h1>Release Monitor</h1>
             <p class="subtitle">Stay updated with the latest client environment changes.</p>
             <div id="last-update" class="last-update">Loading...</div>
+            <button id="trigger-btn" class="trigger-btn">
+                <span class="icon">↻</span> Trigger Update
+            </button>
         </div>
     </header>
+
+    <!-- Token Modal -->
+    <div id="token-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Enable Instant Updates</h3>
+            <p>To trigger the scraper remotely, please enter a GitHub Personal Access Token (Classic) with
+                <code>repo</code> or <code>workflow_dispatch</code> scope.</p>
+            <p class="note">Your token is stored locally in your browser.</p>
+            <input type="password" id="gh-token" placeholder="ghp_..." />
+            <div class="modal-actions">
+                <button id="save-token-btn" class="primary-btn">Trigger Scrape</button>
+                <button id="close-modal-btn" class="secondary-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <main class="container">
         <div id="dashboard" class="dashboard">
@@ -42,4 +62,5 @@
 
     <script src="scripts.js"></script>
 </body>
+
 </html>
