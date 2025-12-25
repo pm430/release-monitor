@@ -1,11 +1,11 @@
 {
-  "lastUpdate": "2025-12-24T18:26:25.076Z",
+  "lastUpdate": "2025-12-25T01:22:57.123Z",
   "releases": [
     {
       "platform": "iOS",
       "version": "iOS & iPadOS 26.3 Beta",
       "status": "Beta",
-      "date": "2025-12-24",
+      "date": "2025-12-25",
       "link": "https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-26_3-release-notes"
     },
     {
