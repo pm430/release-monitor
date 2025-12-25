@@ -60,6 +60,19 @@
     </footer>
 
     <script src="scripts.js"></script>
+
+    <!-- Debug script to test modal immediately -->
+    <script>
+        // Test modal visibility on page load
+        setTimeout(() => {
+            const modal = document.getElementById('token-modal');
+            console.log('Modal element:', modal);
+            console.log('Modal classes:', modal?.className);
+            console.log('Modal computed display:', window.getComputedStyle(modal).display);
+            console.log('Modal computed visibility:', window.getComputedStyle(modal).visibility);
+            console.log('Modal computed opacity:', window.getComputedStyle(modal).opacity);
+        }, 1000);
+    </script>
 </body>
 
 </html>
