@@ -7,11 +7,14 @@ const tokenInput = document.getElementById('gh-token');
 
 // Event Listeners
 triggerBtn.addEventListener('click', () => {
+    console.log('Trigger button clicked');
     // Check if we have a stored token
     const storedToken = localStorage.getItem('update_secret');
     if (storedToken) {
+        console.log('Found stored token, fetching...');
         fetchData(true, storedToken);
     } else {
+        console.log('No token found, showing modal...');
         modal.classList.remove('hidden');
     }
 });
