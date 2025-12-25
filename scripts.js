@@ -1,23 +1,59 @@
 // DOM Elements
 const triggerBtn = document.getElementById('trigger-btn');
+const modal = document.getElementById('token-modal');
+const closeBtn = document.getElementById('close-modal-btn');
+const saveBtn = document.getElementById('save-token-btn');
+const tokenInput = document.getElementById('gh-token');
 
 // Event Listeners
 triggerBtn.addEventListener('click', () => {
-    fetchData(true); // Force refresh
+    // Check if we have a stored token
+    const storedToken = localStorage.getItem('update_secret');
+    if (storedToken) {
+        fetchData(true, storedToken);
+    } else {
+        modal.classList.remove('hidden');
+    }
 });
 
-async function fetchData(forceRefresh = false) {
+closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
+
+saveBtn.addEventListener('click', () => {
+    const token = tokenInput.value.trim();
+    if (token) {
+        localStorage.setItem('update_secret', token);
+        modal.classList.add('hidden');
+        fetchData(true, token);
+    }
+});
+
+async function fetchData(forceRefresh = false, token = null) {
     try {
         if (forceRefresh) {
             triggerBtn.disabled = true;
             triggerBtn.innerHTML = '<span class="icon spinner" style="width:1rem;height:1rem;border-width:2px;margin:0;"></span> Updating...';
         }
 
-        // Add timestamp to prevent browser caching if force refresh
         const url = forceRefresh ? `/api/release?t=${Date.now()}` : '/api/release';
+        const headers = {};
 
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (forceRefresh && token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                // Invalid token
+                localStorage.removeItem('update_secret'); // Clear bad token
+                alert('Invalid Token. Please try again.');
+                if (forceRefresh) modal.classList.remove('hidden'); // Re-open modal
+            }
+            throw new Error(`Server returned ${response.status} ${response.statusText}`);
+        }
 
         const data = await response.json();
         renderDashboard(data);
@@ -28,15 +64,18 @@ async function fetchData(forceRefresh = false) {
         }
     } catch (error) {
         console.error('Error loading data:', error);
-        document.getElementById('dashboard').innerHTML = `
-            <div class="error-state">
-                <p>Failed to load release data. Please check back later.</p>
-                <p class="subtitle">${error.message}</p>
-            </div>
-        `;
-        if (forceRefresh) {
+        // Only show error state if initial load fails
+        if (!forceRefresh) {
+            document.getElementById('dashboard').innerHTML = `
+                <div class="error-state">
+                    <p>Failed to load release data. Please check back later.</p>
+                    <p class="subtitle">${error.message}</p>
+                </div>
+            `;
+        } else {
+            alert(`Update Failed: ${error.message}`);
             triggerBtn.disabled = false;
-            triggerBtn.innerHTML = '<span class="icon">↻</span> Retry Update';
+            triggerBtn.innerHTML = '<span class="icon">↻</span> Check Update';
         }
     }
 }

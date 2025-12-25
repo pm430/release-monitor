@@ -5,7 +5,7 @@ const allowCors = fn => async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version')
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization')
     if (req.method === 'OPTIONS') {
         res.status(200).end()
         return
@@ -128,14 +128,31 @@ async function getWhaleRelease() {
     }
 }
 
+// In-Memory Cache (Global variable persists across warm lambda invocations)
+let cachedData = null;
+
 // Main Handler
 const handler = async (req, res) => {
-    // Optional: Check for secret token if you want to restrict access
-    // const { authorization } = req.headers;
-    // if (authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    //     return res.status(401).json({ error: 'Unauthorized' });
-    // }
+    // Check if this is a "Force Update" request
+    const { authorization } = req.headers;
+    const isForceUpdate = authorization === `Bearer ${process.env.UPDATE_SECRET}`;
 
+    // If request attempts to Force Refresh but Token is invalid, return 401.
+    if (req.headers.authorization && !isForceUpdate) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid Update Token' });
+    }
+
+    // VIEW MODE (No Token)
+    if (!isForceUpdate) {
+        if (cachedData) {
+            // Return cached data
+            res.setHeader('X-Cache-Status', 'HIT');
+            return res.status(200).json(cachedData);
+        }
+        // If no cache (Cold Start), fall through to Scrape (and cache it)
+    }
+
+    // SCRAPE MODE (Force Update OR Cold Start)
     try {
         const results = [];
 
@@ -151,15 +168,25 @@ const handler = async (req, res) => {
         if (edge) results.push(...(Array.isArray(edge) ? edge : [edge]));
         if (whale) results.push(whale);
 
-        // Vercel Serverless Function caching: Cache for 1 hour (3600 seconds)
-        // Stale-while-revalidate for unobtrusive background updates
-        res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-
-        res.status(200).json({
+        const responseData = {
             lastUpdate: new Date().toISOString(),
             releases: results
-        });
+        };
+
+        // Update In-Memory Cache
+        cachedData = responseData;
+
+        res.setHeader('X-Cache-Status', isForceUpdate ? 'REFRESHED' : 'MISS');
+        res.setHeader('Cache-Control', 'max-age=60, s-maxage=60');
+
+        res.status(200).json(responseData);
     } catch (error) {
+        console.error('Scrape failed:', error);
+        // If scrape fails but we have old cache, return it with warning
+        if (cachedData) {
+            res.setHeader('X-Cache-Status', 'STALE');
+            return res.status(200).json(cachedData);
+        }
         res.status(500).json({ error: 'Failed to fetch release data' });
     }
 }
